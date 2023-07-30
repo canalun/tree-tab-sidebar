@@ -30,9 +30,6 @@ function sendCurrentTabs() {
   return
 }
 
-chrome.tabs.onCreated.addListener(async function () {
-  sendCurrentTabs()
-})
 chrome.tabs.onUpdated.addListener(async function () {
   sendCurrentTabs()
 })
