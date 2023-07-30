@@ -128,17 +128,19 @@ const ListItemForTabIncludingChildren: FC<{
             />
           )}
         </ListItemIcon>
+
         <ListItemIcon style={{ minWidth: '30px' }}>
-          {tabNode.tabRef.favIconUrl && (
+          {tabNode.tabRef.favIconUrl ? (
             <img
               src={tabNode.tabRef.favIconUrl}
               height={'18px'}
               width={'18px'}
             />
+          ) : (
+            <div style={{ width: '18px', height: '18px' }}></div>
           )}
         </ListItemIcon>
         <ListItemText
-          inset={!tabNode.tabRef.favIconUrl}
           primary={tabNode.tabRef.title}
           primaryTypographyProps={{
             fontSize: '12px',
