@@ -42,20 +42,27 @@
       "scripting",
       "sidePanel",
       "tabs",
-      "favicon"
+      "favicon",
+      "action"
     ],
     "web_accessible_resources": [
       {
-        "resources": ["_favicon/*"],
-        "matches": ["<all_urls>"],
-        "extension_ids": ["*"]
+        "resources": [
+          "_favicon/*"
+        ],
+        "matches": [
+          "<all_urls>"
+        ],
+        "extension_ids": [
+          "*"
+        ]
       }
     ],
     "side_panel": {
       "default_path": "sidepanel.html"
     },
     "action": {
-      "default_title": "Click to open panel"
+      "default_title": "Click me to open panel"
     }
   }
 }
