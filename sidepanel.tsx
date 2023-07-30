@@ -10,6 +10,7 @@ import {
 import { useState, type FC, type ReactNode, useMemo } from 'react'
 
 // TODO: move calculation logic to background script
+// TODO: display current tab as opened and highlighted
 
 type TabTreeNode = {
   id: chrome.tabs.Tab['id']
@@ -130,12 +131,11 @@ const ListItemForTabIncludingChildren: FC<{
         </ListItemIcon>
 
         <ListItemIcon style={{ minWidth: '30px' }}>
-            <img
-              src={faviconURL(tabNode.tabRef.url)}
-              height={'18px'}
-              width={'18px'}
-            />
-
+          <img
+            src={faviconURL(tabNode.tabRef.url)}
+            height={'18px'}
+            width={'18px'}
+          />
         </ListItemIcon>
         <ListItemText
           primary={tabNode.tabRef.title}
@@ -173,9 +173,9 @@ const ListItemForTabIncludingChildren: FC<{
 }
 
 function faviconURL(u: string) {
-  const url = new URL(chrome.runtime.getURL("/_favicon/"));
-  url.searchParams.set("pageUrl", u);
-  return url.toString();
+  const url = new URL(chrome.runtime.getURL('/_favicon/'))
+  url.searchParams.set('pageUrl', u)
+  return url.toString()
 }
 
 export default SidePanel
