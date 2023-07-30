@@ -2,15 +2,13 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import CloseIcon from '@mui/icons-material/Close'
 import {
   Collapse,
-  Link,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
-  ListSubheader,
+  ListItemText
 } from '@mui/material'
-import { useState, type FC, type ReactNode, useMemo } from 'react'
+import { useMemo, useState, type FC, type ReactNode } from 'react'
 
 // TODO: move calculation logic to background script
 // TODO: display current tab as opened and highlighted
