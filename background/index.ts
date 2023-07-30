@@ -1,5 +1,7 @@
 export {}
 
+// TODO: Add a listener for when the user clicks on the action toolbar icon
+
 console.log('background starts')
 
 // Allows users to open the side panel by clicking on the action toolbar icon
