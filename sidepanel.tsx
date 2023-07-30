@@ -2,10 +2,13 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import CloseIcon from '@mui/icons-material/Close'
 import {
   Collapse,
+  Link,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
 } from '@mui/material'
 import { useState, type FC, type ReactNode, useMemo } from 'react'
 
@@ -42,13 +45,14 @@ function SidePanel() {
       {Array.from(tabTrees.entries()).map(([id, tabNode]) => {
         return tabNode.parentId ? null : (
           <ListItemForTabIncludingChildren
-            tabNode={tabNode}
-            layer={0}
-            tabTrees={tabTrees}
-            key={id}
+          tabNode={tabNode}
+          layer={0}
+          tabTrees={tabTrees}
+          key={id}
           />
-        )
-      })}
+          )
+        })}
+        <ListItem style={{color: 'GrayText', fontSize: '12px'}}><p>If you cannot see any tabs, please update any tab.<br></br> And if you have inconvenience, <a href='https://google.com'>please let us know</a>👶</p></ListItem>
     </List>
   )
 }
@@ -130,11 +134,11 @@ const ListItemForTabIncludingChildren: FC<{
           )}
         </ListItemIcon>
 
-        <ListItemIcon style={{ minWidth: '30px' }}>
+        <ListItemIcon style={{ minWidth: '24px' }}>
           <img
-            src={faviconURL(tabNode.tabRef.url)}
-            height={'18px'}
-            width={'18px'}
+            src={tabNode.tabRef.favIconUrl}
+            height={'16px'}
+            width={'16px'}
           />
         </ListItemIcon>
         <ListItemText
@@ -172,10 +176,11 @@ const ListItemForTabIncludingChildren: FC<{
   )
 }
 
-function faviconURL(u: string) {
-  const url = new URL(chrome.runtime.getURL('/_favicon/'))
-  url.searchParams.set('pageUrl', u)
-  return url.toString()
-}
+// TODO: favicon in below way not working esp. for non-favicon sites
+// function faviconURL(u: string) {
+//   const url = new URL(chrome.runtime.getURL('/_favicon/'))
+//   url.searchParams.set('pageUrl', u)
+//   return url.toString()
+// }
 
 export default SidePanel
