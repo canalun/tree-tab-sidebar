@@ -1,44 +1,39 @@
-import { sendToBackground } from '@plasmohq/messaging'
-
 function SidePanel() {
-  // console.log('i am sidepanel')
-
   const updateTabs = (tabs: chrome.tabs.Tab[]) => {
     const container = document.getElementById('container')
+    container.innerHTML = ''
+
+    const mapForTabRows = new Map()
     for (const tab of tabs) {
       const tabRow = document.createElement('div')
-      console.log(tab.title)
       tabRow.innerHTML = tab.title
       Object.assign(tabRow.style, {
         border: '1px solid black',
       })
-      container.appendChild(tabRow)
+      mapForTabRows.set(tab.id, tabRow)
+    }
+
+    for (const tab of tabs) {
+      const tabRow = mapForTabRows.get(tab.id)
+      if (tab.openerTabId) {
+        const openerTabRow = mapForTabRows.get(tab.openerTabId)
+        if (openerTabRow && tabRow) {
+          openerTabRow.appendChild(tabRow)
+        }
+      } else {
+        container.appendChild(tabRow)
+      }
     }
   }
 
-  // chrome.runtime.onMessage.addListener(({ name, data }) => {
-  //   if (name === 'updateTabs') {
-  //     updateTabs(data.currentTabs)
-  //   }
-  // })
+  chrome.runtime.onMessage.addListener(({ name, data }) => {
+    if (name === 'updateTab') {
+      console.log('ok')
+      updateTabs(data.currentTabs)
+    }
+  })
 
-  const onUpdate = async () => {
-    // nameがneverだって言われるので無視
-    // @ts-ignore
-    const res = await sendToBackground<any, { currentTabs: chrome.tabs.Tab[] }>(
-      {
-        name: 'updateTabs',
-      },
-    )
-    updateTabs(res.currentTabs)
-  }
-
-  return (
-    <>
-      <div id="container"></div>
-      <button onClick={onUpdate}></button>
-    </>
-  )
+  return <div id="container"></div>
 }
 
 export default SidePanel

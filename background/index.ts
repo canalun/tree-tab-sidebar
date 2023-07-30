@@ -1,6 +1,6 @@
 export {}
 
-console.log('background starts2')
+console.log('background starts')
 
 // Allows users to open the side panel by clicking on the action toolbar icon
 chrome.sidePanel
@@ -13,6 +13,11 @@ chrome.tabs.onUpdated.addListener(async function () {
     tabs.forEach((tab) => {
       console.log(tab.title)
       currentTabs.push(tab)
+    })
+
+    chrome.runtime.sendMessage({
+      name: 'updateTab',
+      data: { currentTabs: currentTabs },
     })
   })
 })
