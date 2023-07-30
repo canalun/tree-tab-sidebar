@@ -7,11 +7,14 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material'
-import { useState, type FC, type ReactNode } from 'react'
+import { useState, type FC, type ReactNode, useMemo } from 'react'
+
+// TODO: move calculation logic to background script
 
 type TabTreeNode = {
   id: chrome.tabs.Tab['id']
   childrenId: chrome.tabs.Tab['id'][]
+  tabRef: chrome.tabs.Tab
   parentId?: chrome.tabs.Tab['id']
 }
 
@@ -31,113 +34,7 @@ function SidePanel() {
     },
   )
 
-  const tabMap = new Map<chrome.tabs.Tab['id'], chrome.tabs.Tab>()
-  for (const tab of tabs) {
-    tabMap.set(tab.id, tab)
-  }
-
-  const convertTabIntoTabTreeNode = (tab: chrome.tabs.Tab): TabTreeNode => {
-    return {
-      id: tab.id,
-      parentId: tab.openerTabId,
-      childrenId: [],
-    }
-  }
-
-  const constructTabTrees: (
-    tabs: chrome.tabs.Tab[],
-  ) => Map<chrome.tabs.Tab['id'], TabTreeNode> = (tabs) => {
-    const tabTrees = new Map<chrome.tabs.Tab['id'], TabTreeNode>()
-    tabs.forEach((tab) => {
-      if (tabTrees.has(tab.id)) {
-        return
-      }
-      const tabNode = convertTabIntoTabTreeNode(tab)
-      registerTabTree(tabNode)
-    })
-    return tabTrees
-
-    function registerTabTree(node: TabTreeNode) {
-      tabTrees.set(node.id, node)
-      if (node.parentId) {
-        const parentNode = tabTrees.get(node.parentId)
-        if (parentNode) {
-          parentNode.childrenId.push(node.id)
-        } else {
-          const parentNode = convertTabIntoTabTreeNode(
-            tabMap.get(node.parentId),
-          )
-          parentNode.childrenId.push(node.id)
-          registerTabTree(parentNode)
-        }
-      }
-    }
-  }
-
-  const tabTrees = constructTabTrees(tabs)
-
-  const ListItemForTabIncludingChildren: FC<{
-    tabNode: TabTreeNode
-    layer: number
-    children?: ReactNode
-  }> = ({ tabNode, layer }) => {
-    const [open, setOpen] = useState(false)
-    return (
-      <>
-        <ListItemButton
-          sx={{ pl: layer * 2 }}
-          onClick={() => chrome.tabs.update(tabNode.id, { selected: true })}
-          dense
-          disableGutters
-        >
-          <ListItemIcon style={{minWidth:'12px'}}>
-            {tabNode.childrenId.length === 0 ? <ExpandLess style={{opacity:0}} /> : open ? (
-              <ExpandLess onClick={(e) => {
-                e.stopPropagation()
-                setOpen((prev) => !prev)
-              }}/>
-            ) : (
-              <ExpandMore onClick={(e) => {
-                e.stopPropagation()
-                setOpen((prev) => !prev)}}/>
-            )}
-          </ListItemIcon>
-          <ListItemIcon style={{minWidth:'30px'}}>
-            {tabMap.get(tabNode.id)?.favIconUrl && (
-              <img
-                src={tabMap.get(tabNode.id)?.favIconUrl}
-                height={'18px'}
-                width={'18px'}
-              />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            inset={!tabMap.get(tabNode.id)?.favIconUrl}
-            primary={tabMap.get(tabNode.id)?.title}
-            primaryTypographyProps={{ fontSize: '12px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
-
-          />
-          <ListItemIcon  style={{marginRight:'-30px'}} onClick={(e) => {
-            e.stopPropagation()
-            chrome.tabs.remove(tabNode.id)
-            }} >
-            <CloseIcon/>
-          </ListItemIcon>
-        </ListItemButton>
-        {tabNode.childrenId.map((id) => {
-          const tabNode = tabTrees.get(id)
-          return (
-            <Collapse in={open} timeout="auto">
-              <ListItemForTabIncludingChildren
-                tabNode={tabNode}
-                layer={layer + 1}
-              />
-            </Collapse>
-          )
-        })}
-      </>
-    )
-  }
+  const tabTrees = useMemo(() => constructTabTrees(tabs), [tabs])
 
   return (
     <List sx={{ width: '100%', bgcolor: 'background.paper' }} component="div">
@@ -146,11 +43,133 @@ function SidePanel() {
           <ListItemForTabIncludingChildren
             tabNode={tabNode}
             layer={0}
+            tabTrees={tabTrees}
             key={id}
           />
         )
       })}
     </List>
+  )
+}
+
+function constructTabTrees(
+  tabs: chrome.tabs.Tab[],
+): Map<chrome.tabs.Tab['id'], TabTreeNode> {
+  const tabMap = new Map<chrome.tabs.Tab['id'], chrome.tabs.Tab>()
+  for (const tab of tabs) {
+    tabMap.set(tab.id, tab)
+  }
+
+  const tabTrees = new Map<chrome.tabs.Tab['id'], TabTreeNode>()
+  tabs.forEach((tab) => {
+    if (tabTrees.has(tab.id)) {
+      return
+    }
+    const tabNode = convertTabIntoTabTreeNode(tab)
+    registerTabTree(tabNode)
+  })
+  return tabTrees
+
+  function registerTabTree(node: TabTreeNode) {
+    tabTrees.set(node.id, node)
+    if (node.parentId) {
+      const parentNode = tabTrees.get(node.parentId)
+      if (parentNode) {
+        parentNode.childrenId.push(node.id)
+      } else {
+        const parentNode = convertTabIntoTabTreeNode(tabMap.get(node.parentId))
+        parentNode.childrenId.push(node.id)
+        registerTabTree(parentNode)
+      }
+    }
+  }
+
+  function convertTabIntoTabTreeNode(tab: chrome.tabs.Tab): TabTreeNode {
+    return {
+      id: tab.id,
+      parentId: tab.openerTabId,
+      childrenId: [],
+      tabRef: tab,
+    }
+  }
+}
+
+const ListItemForTabIncludingChildren: FC<{
+  tabNode: TabTreeNode
+  layer: number
+  tabTrees: Map<chrome.tabs.Tab['id'], TabTreeNode>
+  children?: ReactNode
+}> = ({ tabNode, layer, tabTrees }) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <ListItemButton
+        sx={{ pl: layer * 2 }}
+        onClick={() => chrome.tabs.update(tabNode.id, { selected: true })}
+        dense
+        disableGutters
+      >
+        <ListItemIcon style={{ minWidth: '12px' }}>
+          {tabNode.childrenId.length === 0 ? (
+            <ExpandLess style={{ opacity: 0 }} />
+          ) : open ? (
+            <ExpandLess
+              onClick={(e) => {
+                e.stopPropagation()
+                setOpen((prev) => !prev)
+              }}
+            />
+          ) : (
+            <ExpandMore
+              onClick={(e) => {
+                e.stopPropagation()
+                setOpen((prev) => !prev)
+              }}
+            />
+          )}
+        </ListItemIcon>
+        <ListItemIcon style={{ minWidth: '30px' }}>
+          {tabNode.tabRef.favIconUrl && (
+            <img
+              src={tabNode.tabRef.favIconUrl}
+              height={'18px'}
+              width={'18px'}
+            />
+          )}
+        </ListItemIcon>
+        <ListItemText
+          inset={!tabNode.tabRef.favIconUrl}
+          primary={tabNode.tabRef.title}
+          primaryTypographyProps={{
+            fontSize: '12px',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+          }}
+        />
+        <ListItemIcon
+          style={{ marginRight: '-30px' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            chrome.tabs.remove(tabNode.id)
+          }}
+        >
+          <CloseIcon />
+        </ListItemIcon>
+      </ListItemButton>
+      {tabNode.childrenId.map((id) => {
+        const tabNode = tabTrees.get(id)
+        return (
+          <Collapse in={open} timeout="auto">
+            <ListItemForTabIncludingChildren
+              tabNode={tabNode}
+              layer={layer + 1}
+              tabTrees={tabTrees}
+            />
+          </Collapse>
+        )
+      })}
+    </>
   )
 }
 
