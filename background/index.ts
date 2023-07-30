@@ -4,6 +4,13 @@ export {}
 
 console.log('background starts')
 
+chrome.runtime.onInstalled.addListener(function (object) {
+  let internalUrl = chrome.runtime.getURL('/options.html')
+  if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.tabs.create({ url: internalUrl })
+  }
+})
+
 // Allows users to open the side panel by clicking on the action toolbar icon
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
