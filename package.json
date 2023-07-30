@@ -35,9 +35,6 @@
     "typescript": "5.1.6"
   },
   "manifest": {
-    "host_permissions": [
-      "https://*/*"
-    ],
     "permissions": [
       "scripting",
       "sidePanel",
