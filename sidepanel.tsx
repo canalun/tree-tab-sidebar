@@ -85,38 +85,49 @@ function SidePanel() {
     return (
       <>
         <ListItemButton
-          sx={{ pl: layer * 4 }}
+          sx={{ pl: layer * 2 }}
           onClick={() => chrome.tabs.update(tabNode.id, { selected: true })}
+          dense
+          disableGutters
         >
-          <ListItemIcon onClick={() => setOpen((prev) => !prev)}>
-            {tabNode.childrenId.length === 0 ? null : open ? (
-              <ExpandLess />
+          <ListItemIcon style={{minWidth:'12px'}}>
+            {tabNode.childrenId.length === 0 ? <ExpandLess style={{opacity:0}} /> : open ? (
+              <ExpandLess onClick={(e) => {
+                e.stopPropagation()
+                setOpen((prev) => !prev)
+              }}/>
             ) : (
-              <ExpandMore />
+              <ExpandMore onClick={(e) => {
+                e.stopPropagation()
+                setOpen((prev) => !prev)}}/>
             )}
           </ListItemIcon>
-          <ListItemIcon>
+          <ListItemIcon style={{minWidth:'30px'}}>
             {tabMap.get(tabNode.id)?.favIconUrl && (
               <img
                 src={tabMap.get(tabNode.id)?.favIconUrl}
-                height={'20px'}
-                width={'20px'}
+                height={'18px'}
+                width={'18px'}
               />
             )}
           </ListItemIcon>
           <ListItemText
             inset={!tabMap.get(tabNode.id)?.favIconUrl}
             primary={tabMap.get(tabNode.id)?.title}
-            primaryTypographyProps={{ fontSize: '12px' }}
+            primaryTypographyProps={{ fontSize: '12px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+
           />
-          <ListItemIcon onClick={() => chrome.tabs.remove(tabNode.id)}>
-            <CloseIcon />
+          <ListItemIcon  style={{marginRight:'-30px'}} onClick={(e) => {
+            e.stopPropagation()
+            chrome.tabs.remove(tabNode.id)
+            }} >
+            <CloseIcon/>
           </ListItemIcon>
         </ListItemButton>
         {tabNode.childrenId.map((id) => {
           const tabNode = tabTrees.get(id)
           return (
-            <Collapse in={open} timeout="auto" unmountOnExit>
+            <Collapse in={open} timeout="auto">
               <ListItemForTabIncludingChildren
                 tabNode={tabNode}
                 layer={layer + 1}
