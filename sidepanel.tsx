@@ -52,7 +52,7 @@ function SidePanel() {
           />
           )
         })}
-        <ListItem style={{color: 'GrayText', fontSize: '12px'}}><p>If you cannot see any tabs, please update any tab.<br></br> And if you have inconvenience, <a href='https://google.com'>please let us know</a>👶</p></ListItem>
+        <ListItem style={{color: 'GrayText', fontSize: '12px'}}>If you cannot see any tabs, please update any tab.</ListItem>
     </List>
   )
 }
