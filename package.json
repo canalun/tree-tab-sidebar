@@ -1,6 +1,6 @@
 {
-  "name": "tree-tab-sidebar-for-chrome",
-  "displayName": "Tree tab sidebar for chrome",
+  "name": "tree-tab-sidebar",
+  "displayName": "Tree Tab Sidebar",
   "version": "0.0.1",
   "description": "Let's keep tabs tidy with tree-style sidebar!!",
   "author": "canalun",
