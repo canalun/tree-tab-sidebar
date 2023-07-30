@@ -130,15 +130,12 @@ const ListItemForTabIncludingChildren: FC<{
         </ListItemIcon>
 
         <ListItemIcon style={{ minWidth: '30px' }}>
-          {tabNode.tabRef.favIconUrl ? (
             <img
-              src={tabNode.tabRef.favIconUrl}
+              src={faviconURL(tabNode.tabRef.url)}
               height={'18px'}
               width={'18px'}
             />
-          ) : (
-            <div style={{ width: '18px', height: '18px' }}></div>
-          )}
+
         </ListItemIcon>
         <ListItemText
           primary={tabNode.tabRef.title}
@@ -173,6 +170,12 @@ const ListItemForTabIncludingChildren: FC<{
       })}
     </>
   )
+}
+
+function faviconURL(u: string) {
+  const url = new URL(chrome.runtime.getURL("/_favicon/"));
+  url.searchParams.set("pageUrl", u);
+  return url.toString();
 }
 
 export default SidePanel
