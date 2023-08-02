@@ -36,11 +36,9 @@
   },
   "manifest": {
     "permissions": [
-      "scripting",
       "sidePanel",
       "tabs",
-      "favicon",
-      "action"
+      "favicon"
     ],
     "web_accessible_resources": [
       {
