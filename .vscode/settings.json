@@ -15,5 +15,5 @@
     "source.fixAll.eslint": true
   },
   "cmake.configureOnOpen": false,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": false
 }
