@@ -6,9 +6,10 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from '@mui/material'
 import { useMemo, useState, type FC, type ReactNode } from 'react'
+import defaultFavicon from 'data-base64:./assets/default_favicon.png'
 
 // TODO: move calculation logic to background script
 // TODO: display current tab as opened and highlighted
@@ -17,6 +18,7 @@ type TabTreeNode = {
   id: chrome.tabs.Tab['id']
   childrenId: chrome.tabs.Tab['id'][]
   tabRef: chrome.tabs.Tab
+  isActive: boolean
   parentId?: chrome.tabs.Tab['id']
 }
 
@@ -43,14 +45,16 @@ function SidePanel() {
       {Array.from(tabTrees.entries()).map(([id, tabNode]) => {
         return tabNode.parentId ? null : (
           <ListItemForTabIncludingChildren
-          tabNode={tabNode}
-          layer={0}
-          tabTrees={tabTrees}
-          key={id}
+            tabNode={tabNode}
+            layer={0}
+            tabTrees={tabTrees}
+            key={id}
           />
-          )
-        })}
-        <ListItem style={{color: 'GrayText', fontSize: '12px'}}>If you cannot see any tabs, please update any tab.</ListItem>
+        )
+      })}
+      <ListItem style={{ color: 'GrayText', fontSize: '12px' }}>
+        If you cannot see any tabs, please update any tab.
+      </ListItem>
     </List>
   )
 }
@@ -92,6 +96,7 @@ function constructTabTrees(
       id: tab.id,
       parentId: tab.openerTabId,
       childrenId: [],
+      isActive: tab.active && tab.windowId === -2, // ここではwindowId=-2になっていない説。バックグラウンドでやらないといけない説
       tabRef: tab,
     }
   }
@@ -107,7 +112,10 @@ const ListItemForTabIncludingChildren: FC<{
   return (
     <>
       <ListItemButton
-        sx={{ pl: layer * 2 }}
+        sx={{
+          pl: layer * 2,
+          backgroundColor: tabNode.isActive ? 'lightgray' : '',
+        }}
         onClick={() => chrome.tabs.update(tabNode.id, { selected: true })}
         dense
         disableGutters
@@ -134,7 +142,12 @@ const ListItemForTabIncludingChildren: FC<{
 
         <ListItemIcon style={{ minWidth: '24px' }}>
           <img
-            src={tabNode.tabRef.favIconUrl}
+            src={
+              !tabNode.tabRef.favIconUrl.startsWith('chrome-extension://') &&
+              tabNode.tabRef.favIconUrl
+                ? tabNode.tabRef.favIconUrl
+                : defaultFavicon
+            }
             height={'16px'}
             width={'16px'}
           />
@@ -173,12 +186,5 @@ const ListItemForTabIncludingChildren: FC<{
     </>
   )
 }
-
-// TODO: favicon in below way not working esp. for non-favicon sites
-// function faviconURL(u: string) {
-//   const url = new URL(chrome.runtime.getURL('/_favicon/'))
-//   url.searchParams.set('pageUrl', u)
-//   return url.toString()
-// }
 
 export default SidePanel

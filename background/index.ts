@@ -30,21 +30,35 @@ function sendCurrentTabs() {
   return
 }
 
+chrome.tabs.onCreated.addListener(async function () {
+  // sendCurrentTabs()
+  console.log('tab created')
+})
+chrome.tabs.onActivated.addListener(async function () {
+  // sendCurrentTabs()
+  console.log('tab activated')
+})
 chrome.tabs.onUpdated.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab updated')
 })
 chrome.tabs.onMoved.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab moved')
 })
 chrome.tabs.onRemoved.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab removed')
 })
 chrome.tabs.onReplaced.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab replaced')
 })
 chrome.tabs.onAttached.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab attached')
 })
 chrome.tabs.onDetached.addListener(async function () {
-  sendCurrentTabs()
+  // sendCurrentTabs()
+  console.log('tab detached')
 })
