@@ -1,11 +1,8 @@
 import { TabTree, type TabTreeMessage } from '~tabtree'
 export {}
 
-console.log('background starts')
-
 // Display the instruction page after installation
 chrome.runtime.onInstalled.addListener(function (object) {
-  console.log('runtime onInstalled')
   let internalUrl = chrome.runtime.getURL('/options.html')
   if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
     chrome.tabs.create({ url: internalUrl })
@@ -23,7 +20,6 @@ let windowNumberMap: Map<chrome.tabs.Tab['windowId'], number> = new Map()
 
 // Initialize tab tree and window map when the extension is loaded
 chrome.windows.getAll({}, function (windows) {
-  console.log('initialize window map')
   let index = 0
   windows.forEach((window) => {
     if (!windowNumberMap.get(window.id)) {
@@ -32,9 +28,8 @@ chrome.windows.getAll({}, function (windows) {
     }
   })
   chrome.tabs.query({}, function (tabs) {
-    console.log('initialize tab tree')
     tabTree = new TabTree(tabs, windowNumberMap)
-    console.log(tabTree)
+    console.log('initialized tab tree,', tabTree)
   })
 })
 
@@ -58,7 +53,7 @@ chrome.tabs.onActivated.addListener(() => {
 })
 
 chrome.tabs.onUpdated.addListener((_) => {
-  console.log('tab activated')
+  console.log('tab updated')
   sendTabTree()
 })
 
@@ -88,9 +83,8 @@ chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
  * because chrome does not mutate tabs but creates new tabs on every event.
  */
 function sendTabTree() {
-  console.log(tabTree)
   chrome.tabs.query({}, function (tabs) {
-    console.log('update tab tree')
+    console.log('update tab tree:', tabTree)
     tabTree.updateTabRefs(tabs)
     chrome.runtime.sendMessage<TabTreeMessage>({
       name: 'tabTree',
