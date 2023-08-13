@@ -43,8 +43,12 @@ chrome.windows.getAll({}, function (windows) {
 //////////////////
 
 chrome.tabs.onCreated.addListener((tab) => {
-  console.log('tab created')
-  tabTree.addTabToTree(tab, windowNumberMap)
+  console.log('tab created:', tab)
+  const parentId =
+    tab.pendingUrl !== 'chrome://newtab/' && tab.openerTabId
+      ? tab.openerTabId
+      : null
+  tabTree.addTabToTree(tab, parentId, windowNumberMap)
   sendTabTree()
 })
 

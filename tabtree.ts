@@ -12,8 +12,11 @@ export class TabTree {
       })
   }
   tree: Map<chrome.tabs.Tab['id'], TabTreeNode>
-  addTabToTree(tab: chrome.tabs.Tab, windowNumberMap: WindowNumberMap) {
-    const parentId = tab.openerTabId ?? null
+  addTabToTree(
+    tab: chrome.tabs.Tab,
+    parentId: chrome.tabs.Tab['id'] | null,
+    windowNumberMap: WindowNumberMap,
+  ) {
     const newTabTreeNode: TabTreeNode = convertTabToTabTreeNode(
       tab,
       windowNumberMap,
