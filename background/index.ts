@@ -1,5 +1,5 @@
 import { TabTree, type TabTreeMessage } from '~tabtree'
-export {}
+export {} // plasmo template
 
 // Display the instruction page after installation
 chrome.runtime.onInstalled.addListener(function (object) {
@@ -84,11 +84,11 @@ chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
  */
 function sendTabTree() {
   chrome.tabs.query({}, function (tabs) {
-    console.log('update tab tree:', tabTree)
     tabTree.updateTabRefs(tabs)
     chrome.runtime.sendMessage<TabTreeMessage>({
       name: 'tabTree',
       data: Array.from(tabTree.tree.entries()),
     })
+    console.log('sent tab tree:', Array.from(tabTree.tree.entries()))
   })
 }

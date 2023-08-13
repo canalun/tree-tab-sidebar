@@ -18,7 +18,7 @@ import {
 } from 'react'
 import type { TabTree, TabTreeMessage, TabTreeNode } from '~tabtree'
 
-export default SidePanel
+export default SidePanel // plasmo template
 
 function SidePanel() {
   const [tabTree, setTabTree] = useState<TabTree['tree']>(new Map())

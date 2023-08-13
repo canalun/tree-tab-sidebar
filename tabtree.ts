@@ -32,25 +32,29 @@ export class TabTree {
       }
     }
   }
+  /**
+   * It removes the tab from the tree,
+   * and reassigns children of the removed tab to its parent.
+   */
   removeTabFromTree(removedTabId: chrome.tabs.Tab['id']) {
     const parentId = this.tree.get(removedTabId).parentId
+    const childrenIds = this.tree.get(removedTabId).childrenIds
     if (parentId) {
-      const parentOfRemovedTab = this.tree.get(
-        this.tree.get(removedTabId).parentId,
-      )
-      if (parentOfRemovedTab) {
-        const removedIndex =
-          parentOfRemovedTab.childrenIds.indexOf(removedTabId)
-        parentOfRemovedTab.childrenIds.splice(removedIndex, 1)
+      const parentNode = this.tree.get(parentId)
+      if (parentNode) {
+        parentNode.childrenIds.splice(
+          parentNode.childrenIds.indexOf(removedTabId),
+          1,
+        )
+        parentNode.childrenIds.push(...childrenIds)
       } else {
         console.error('parent of removed tab does not exist')
       }
     }
-    const childrenIdsOfRemovedTab = this.tree.get(removedTabId).childrenIds
-    childrenIdsOfRemovedTab.forEach((childId) => {
-      const child = this.tree.get(childId)
-      if (child) {
-        child.parentId = parentId
+    childrenIds.forEach((childId) => {
+      const childNode = this.tree.get(childId)
+      if (childNode) {
+        childNode.parentId = parentId
       } else {
         console.error('child of removed tab does not exist:', childId)
       }
